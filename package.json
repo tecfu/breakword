@@ -1,0 +1,24 @@
+{
+  "name": "breakword",
+  "version": "1.0.0",
+  "description": "Get index of character after which variable 'word' must be broken given variable 'length' (accounts for wide characters).",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tecfu/breakword.git"
+  },
+  "keywords": [
+    "wordbreak",
+    "break-word",
+    "textwrap"
+  ],
+  "author": "tecfu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tecfu/breakword/issues"
+  },
+  "homepage": "https://github.com/tecfu/breakword#readme"
+}

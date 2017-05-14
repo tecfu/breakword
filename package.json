@@ -2,7 +2,7 @@
   "name": "breakword",
   "version": "1.0.0",
   "description": "Get index of character after which variable 'word' must be broken given variable 'length' (accounts for wide characters).",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

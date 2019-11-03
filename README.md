@@ -1,6 +1,6 @@
 # breakword
 
-Get index (0,1,2,...) of the character where a word must be broken given it must
+Get index i.e. 0,1,2,... of the character where a word must be broken given it must
 be wrapped within a certain length of spaces. 
 
 Useful because javascript's String.length does not reflect the true width of emojis and wide characters.

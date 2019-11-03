@@ -15,10 +15,10 @@ npm install breakword
 
 1. To find the index of the character to break after if we want to limit our characters fit on a line 3 spaces wide.
 
-```
-var Breakword = require ("breakword");
-var word = "打破我的角色三";
-var breakIndex = Breakword(word,3); 
+```js
+const Breakword = require ("breakword");
+const word = "打破我的角色三";
+const breakIndex = Breakword(word,3); 
 console.log(breakIndex) //0
 ```
 The result here - 0 - means all the characters before index 0 (in this case only the character 打) can fit in a line 3 spaces long.

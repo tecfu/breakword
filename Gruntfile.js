@@ -9,7 +9,7 @@ module.exports = function(grunt){
 			},
 			dist: {
 				files: {
-					'dist/index.js': 'src/index.js'
+					'dist/main.js': 'src/main.js'
 				}
 			}
 		}

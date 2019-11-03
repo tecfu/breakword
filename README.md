@@ -40,3 +40,9 @@ npm --save run test
 ```bash
 npm --display run test
 ```
+
+## Build
+
+```bash
+npm run-script build
+```

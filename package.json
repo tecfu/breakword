@@ -1,12 +1,13 @@
 {
   "name": "breakword",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Get index of character after which variable 'word' must be broken given variable 'length' (accounts for wide characters).",
   "main": "dist/main.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha",
     "lint": "./node_modules/.bin/eslint src/*",
-    "lint-fix": "./node_modules/.bin/eslint src/* --fix"
+    "lint-fix": "./node_modules/.bin/eslint src/* --fix",
+    "build": "./node_modules/.bin/grunt"
   },
   "repository": {
     "type": "git",

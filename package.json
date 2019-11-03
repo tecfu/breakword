@@ -1,10 +1,12 @@
 {
   "name": "breakword",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Get index of character after which variable 'word' must be broken given variable 'length' (accounts for wide characters).",
-  "main": "dist/index.js",
+  "main": "dist/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "./node_modules/mocha/bin/mocha",
+    "lint": "./node_modules/.bin/eslint src/*",
+    "lint-fix": "./node_modules/.bin/eslint src/* --fix"
   },
   "repository": {
     "type": "git",
@@ -23,9 +25,13 @@
   "homepage": "https://github.com/tecfu/breakword#readme",
   "devDependencies": {
     "babel-preset-es2015": "^6.24.1",
+    "eslint": "^6.6.0",
     "grunt": "^1.0.1",
     "grunt-babel": "^6.0.0",
-    "load-grunt-tasks": "^3.5.2"
+    "load-grunt-tasks": "^3.5.2",
+    "grunt-mocha-test": "^0.13.3",
+    "mocha": "^5.2.0",
+    "chai": "^4.2.0"
   },
   "dependencies": {
     "wcwidth": "^1.0.1"

@@ -1,17 +1,17 @@
-const Wcwidth = require("wcwidth")
+const wcwidth = require("wcwidth")
 
 module.exports = function(input, breakAtLength) {
 
   let str = input.toString()
-  var charArr = [...str]
-  var index = 0
-  var indexOfLastFitChar = 0
-  var fittableLength = 0
+  const charArr = [...str]
+  let index = 0
+  let indexOfLastFitChar = 0
+  let fittableLength = 0
 
   while(charArr.length > 0) {
 
-    var char = charArr.shift()
-    var currentLength = fittableLength + Wcwidth(char)
+    const char = charArr.shift()
+    const currentLength = fittableLength + wcwidth(char)
 
     if(currentLength <= breakAtLength) {
       indexOfLastFitChar = index
@@ -20,7 +20,7 @@ module.exports = function(input, breakAtLength) {
     } else {
       break
     }
-    
+
   }
 
   //break after this character

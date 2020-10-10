@@ -21,7 +21,7 @@
     "textwrap"
   ],
   "author": "tecfu",
-  "license": "gpl-2.0",
+  "license": "GPL-2.0",
   "bugs": {
     "url": "https://github.com/tecfu/breakword/issues"
   },

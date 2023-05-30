@@ -1,6 +1,6 @@
 {
   "name": "breakword",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Get index of character after which variable 'word' must be broken given variable 'length' (accounts for wide characters).",
   "main": "dist/main.js",
   "scripts": {

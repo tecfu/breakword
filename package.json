@@ -1,15 +1,22 @@
 {
   "name": "breakword",
-  "version": "1.0.6",
-  "description": "Get index of character after which variable 'word' must be broken given variable 'length' (accounts for wide characters).",
-  "main": "dist/main.js",
+  "version": "1.0.7",
+  "description": "Get the character index where a word must be broken to fit within a given display width.",
+  "main": "src/main.js",
+  "exports": {
+    ".": "./src/main.js"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
-    "coverage": "./node_modules/.bin/nyc mocha",
-    "test": "./node_modules/mocha/bin/mocha",
-    "lint": "./node_modules/.bin/eslint src/*",
-    "lint-fix": "./node_modules/.bin/eslint src/* --fix",
-    "build": "./node_modules/.bin/grunt",
-    "prepublishOnly": "npm run build"
+    "test": "node --test",
+    "prepublishOnly": "npm test"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "repository": {
     "type": "git",
@@ -26,18 +33,6 @@
     "url": "https://github.com/tecfu/breakword/issues"
   },
   "homepage": "https://github.com/tecfu/breakword#readme",
-  "devDependencies": {
-    "babel-preset-es2015": "^6.24.1",
-    "chai": "^4.2.0",
-    "eslint": "^6.6.0",
-    "grunt": "^1.0.1",
-    "grunt-babel": "^6.0.0",
-    "grunt-mocha-test": "^0.13.3",
-    "husky": "^4.2.3",
-    "load-grunt-tasks": "^3.5.2",
-    "mocha": "^5.2.0",
-    "nyc": "^15.0.0"
-  },
   "dependencies": {
     "wcwidth": "^1.0.1"
   }

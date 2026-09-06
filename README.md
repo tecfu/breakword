@@ -1,48 +1,42 @@
 # breakword
 
-Get index i.e. 0,1,2,... of the character where a word must be broken given it must
-be wrapped within a certain length of spaces. 
-
-Useful because javascript's String.length does not reflect the true width of emojis and wide characters.
+Get the zero-based index of the character after which a word must be broken so that the portion before the break fits within a given display width. Width is measured with [`wcwidth`](https://www.npmjs.com/package/wcwidth), so wide characters and emoji are accounted for instead of relying on JavaScript's UTF-16 `String.length`.
 
 ## Installation
 
-```
-npm install breakword 
+```bash
+npm install breakword
 ```
 
-## Examples
-
-1. To find the index of the character to break after if we want to limit our characters fit on a line 3 spaces wide.
+## Usage
 
 ```js
-const Breakword = require ("breakword");
-const word = "打破我的角色三";
-const breakIndex = Breakword(word,3); 
-console.log(breakIndex) //0
-```
-The result here - 0 - means all the characters before index 0 (in this case only the character 打) can fit in a line 3 spaces long.
+const breakword = require('breakword');
 
-## Test
+const word = '打破我的角色三';
+const breakIndex = breakword(word, 3);
+
+console.log(breakIndex); // 0
+```
+
+The returned value is a **zero-based Unicode code-point index**. A result of `0` means the break occurs immediately before the character at index `0`; in the example above, only `打` fits within a display width of 3, so the break is before `破`.
+
+The function accepts values that can be converted to strings, including numbers:
+
+```js
+breakword(2.1, 1); // 0
+```
+
+## Development
+
+Tests use Node.js's built-in test runner, so no test framework or build step is required.
 
 ```bash
 npm test
 ```
 
-- Save new test results to test/test.json
+Supported Node.js versions are the current maintained LTS releases beginning with Node.js 22.
 
-```bash
-npm --save run test
-```
+## Release
 
-- Display test outputs only
-
-```bash
-npm --display run test
-```
-
-## Build
-
-```bash
-npm run-script build
-```
+The package ships the source module directly. `npm publish` runs the test suite before publishing.

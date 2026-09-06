@@ -1,66 +1,26 @@
 'use strict';
 
-const Tests = {};
-const fs = require('fs'); 
-const chai = require('chai');
-const expect = chai.expect;
-const assert = chai.assert;
-const should = chai.should();
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const breakword = require('..');
 
-const breakword = require(__dirname+'/../src/main.js');
-//get npm arg
-const ARG = JSON.parse(process.env.npm_config_argv)['original'][0]
+const cases = [
+  ['2.0', 1, 0],
+  [2.1, 1, 0],
+  ['宽字符', 0, 0],
+  ['宽字符', 1, 0],
+  ['宽字符', 2, 0],
+  ['宽字符', 3, 0],
+  ['宽字符', 4, 1],
+  ['宽ab', 4, 2],
+  ['', 10, 0],
+  ['😀abc', 2, 0],
+  ['😀abc', 3, 1],
+  ['e\u0301abc', 1, 1],
+];
 
-let testResultFilepath = __dirname+'/tests.json';
-let test = function(testResult,correctResult,word,width){
-  it(
-    `The string "${word}" must break after the character at index ${correctResult} to fit within a line of ${width} width`,
-    function(){
-      testResult.should.equal(correctResult);
-    }
-  )
-};
-
-//get test list
-let str = fs.readFileSync(testResultFilepath,{
-  encoding : 'utf-8'
-});
-
-let obj = JSON.parse(str);
-
-for(let i in obj){  
-  
-  let testResult = breakword(obj[i].input, obj[i].width);
-
-  console.log("Test Properties:",obj[i]);
-  console.log("12345678901234567890");
-  console.log("BEGIN---------------");
-  console.log(obj[i].input);
-  console.log(testResult);
-  console.log("END-----------------\n");
-
-
-  switch(true){
-    case(ARG === '--save'):
-    //save tests
-      obj[i].output = testResult;
-      break;
-    case(ARG === '--display'):
-    //show tests (do nothing)
-      console.log("--- ONLY DISPLAYING EXECUTION RESULTS, TESTS NOT RUN AGAINST SAVED RESULTS!!! ---")
-      break;
-    default:
-    //run tests
-      describe('Test '+i,function(){
-        test(testResult,obj[i].correctResult,obj[i].input,obj[i].width);
-      })
-  }
+for (const [input, width, expected] of cases) {
+  test(`${JSON.stringify(input)} at width ${width}`, () => {
+    assert.equal(breakword(input, width), expected);
+  });
 }
-
-if(ARG === '--save'){
-  //write saved object to file
-  fs.writeFileSync(testResultFilepath,JSON.stringify(obj,null,2),'utf8');
-  console.log("Execution results saved to file.");
-}
-
-module.exports = Tests;

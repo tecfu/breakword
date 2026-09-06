@@ -4,7 +4,7 @@ import wcwidth from 'wcwidth'
  * Return the zero-based Unicode code-point index after which `input` should be
  * broken so that its display width does not exceed `breakAtLength`.
  */
-export default function breakword(input: unknown, breakAtLength: number): number {
+function breakword(input: unknown, breakAtLength: number): number {
   const str = String(input)
 
   if (!Number.isFinite(breakAtLength) || breakAtLength < 0) {
@@ -29,3 +29,5 @@ export default function breakword(input: unknown, breakAtLength: number): number
 
   return indexOfLastFitChar
 }
+
+export = breakword

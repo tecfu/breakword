@@ -1,19 +1,28 @@
 {
   "name": "breakword",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Get the character index where a word must be broken to fit within a given display width.",
-  "main": "src/main.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "exports": {
-    ".": "./src/main.js"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.js"
+    }
   },
   "files": [
-    "src",
+    "dist",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "test": "node --test",
+    "build": "tsc",
+    "test": "npm run build && node --test",
     "prepublishOnly": "npm test"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
   },
   "engines": {
     "node": ">=22"

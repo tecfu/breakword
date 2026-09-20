@@ -17,6 +17,12 @@ const cases = [
   ['😀abc', 2, 0],
   ['😀abc', 3, 1],
   ['e\u0301abc', 1, 1],
+  ['a\tb', 3, 2], // control characters are zero-width
+  ['x\uFE0Fy', 2, 2], // variation selectors are zero-width
+  // widths come from the current Unicode data, not a frozen table
+  ['⭐ab', 2, 0], // two-cell emoji that older tables missed
+  ['\u{1D54F}\u{1D54F}', 2, 1], // astral yet narrow (East Asian Width = Na)
+  ['\u{1F1EB}\u{1F1F7}ab', 3, 2], // regional indicators pair into one flag
 ];
 
 for (const [input, width, expected] of cases) {

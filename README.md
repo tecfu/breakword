@@ -1,6 +1,8 @@
 # breakword
 
-Get the zero-based index of the character after which a word must be broken so that the portion before the break fits within a given display width. Width is measured with [`wcwidth`](https://www.npmjs.com/package/wcwidth), so wide characters and emoji are accounted for instead of relying on JavaScript's UTF-16 `String.length`.
+Get the zero-based index of the character after which a word must be broken so that the portion before the break fits within a given display width. Width follows the Unicode East Asian Width tables, with the two-cell emoji of Unicode Standard Annex #51, so wide characters and emoji are accounted for instead of relying on JavaScript's UTF-16 `String.length`.
+
+Zero dependencies: the wide/fullwidth ranges ship inlined in the source, so there is nothing to install and nothing to audit.
 
 ## Installation
 
@@ -36,6 +38,12 @@ npm test
 ```
 
 Supported Node.js versions are the current maintained LTS releases beginning with Node.js 22.
+
+The width table comes from Unicode's `EastAsianWidth.txt`. Refresh it against the current Unicode release with:
+
+```bash
+node tools/gen-wide.mjs   # rewrites the table in src/main.js
+```
 
 ## Release
 

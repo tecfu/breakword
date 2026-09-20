@@ -211,6 +211,13 @@ module.exports = function breakword(input, breakAtLength) {
   return indexOfLastFitChar;
 };
 
+/**
+ * Number of terminal cells (0, 1 or 2) a single Unicode code point occupies,
+ * under the width policy documented at the top of this file. Takes one code
+ * point, not a string — sum it over `[...str]` for a string width.
+ */
+module.exports.width = width;
+
 // Used by test/unicode.test.js and test/gen-wide.test.js to check the table
 // and its rules against Unicode properties. Not part of the public API and
 // not covered by semver.

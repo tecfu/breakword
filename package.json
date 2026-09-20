@@ -1,6 +1,6 @@
 {
   "name": "breakword",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Get the character index where a word must be broken to fit within a given display width.",
   "main": "src/main.js",
   "exports": {

@@ -43,6 +43,13 @@ The function accepts values that can be converted to strings, including numbers:
 breakword(2.1, 1); // 0
 ```
 
+`breakword.width(char)` returns the display width (0, 1 or 2 terminal cells) of a single code point, for consumers that measure text themselves:
+
+```js
+const width = (str) => [...str].reduce((n, c) => n + breakword.width(c), 0);
+width('打破a\u200d'); // 5
+```
+
 ## Development
 
 Tests use Node.js's built-in test runner, so no test framework or build step is required.

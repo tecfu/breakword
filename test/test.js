@@ -14,11 +14,8 @@ test('width() returns the width of a single Unicode code point', () => {
   assert.equal(breakword.width('\u{1F1EB}'), 1);
 });
 
-test('width() rejects empty and multi-code-point strings', () => {
-  assert.throws(() => breakword.width(''), {
-    name: 'TypeError',
-    message: 'width() expects exactly one Unicode code point',
-  });
+test('width() returns zero for an empty string and rejects invalid input', () => {
+  assert.equal(breakword.width(''), 0);
   assert.throws(() => breakword.width('ab'), {
     name: 'TypeError',
     message: 'width() expects exactly one Unicode code point',

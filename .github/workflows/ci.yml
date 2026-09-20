@@ -26,6 +26,6 @@ jobs:
       - name: Test
         run: npm test
       - name: Type check
-        run: npm run build
+        run: npm run typecheck
       - name: Verify the generated Unicode table
         run: npm run check:unicode

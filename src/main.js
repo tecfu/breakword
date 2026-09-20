@@ -171,6 +171,10 @@ const ZERO = /[\u200B\p{Mn}\p{Me}\p{Cf}\u1160-\u11FF]/u;
 const EMOJI = /\p{Emoji_Presentation}/u;
 
 function width(char) {
+  if (typeof char !== 'string' || [...char].length !== 1) {
+    throw new TypeError('width() expects exactly one Unicode code point');
+  }
+
   const cp = char.codePointAt(0);
   if (cp < 32 || (cp >= 0x7f && cp < 0xa0)) return 0; // C0/C1 controls
   if (cp === 0xad) return 1; // SOFT HYPHEN, width 1 by the wcwidth() convention

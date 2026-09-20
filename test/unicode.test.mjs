@@ -6,7 +6,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import breakword from '../src/main.js';
+import breakword from '../dist/main.js';
 
 const { WIDE, ZERO, EMOJI, width } = breakword.internals;
 

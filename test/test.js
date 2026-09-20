@@ -22,7 +22,7 @@ test('width() returns zero for an empty string and rejects invalid input', () =>
   });
   assert.throws(() => breakword.width(1), {
     name: 'TypeError',
-    message: 'width() expects exactly one Unicode code point',
+    message: 'width() expects a string',
   });
 });
 

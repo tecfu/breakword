@@ -16,7 +16,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Bump deliberately, together with the table and the conformance suite.
 export const UNICODE_VERSION = '18.0.0';
 
 const url = (version) => `https://www.unicode.org/Public/${version}/ucd/EastAsianWidth.txt`;
@@ -28,25 +27,86 @@ async function load(source) {
   return res.text();
 }
 
-// A UCD line is `start..end ; Value` or `start ; Value`. Properties files also
-// document the value used for every code point they do not list with a
-// `# @missing: start..end; Value` comment, and those defaults carry real
-// weight — a default of W would otherwise silently disappear from the table.
-// EastAsianWidth ships exactly one, `# @missing: 0000..10FFFF; N`, so the
-// output has no @missing-derived ranges today; the branch is what keeps that
-// from changing silently.
+const VALUE = new Map([
+  ['N', false],
+  ['Na', false],
+  ['A', false],
+  ['H', false],
+  ['W', true],
+  ['F', true],
+]);
+
+const CODE_POINT_RANGE = /^(?:([0-9A-Fa-f]{4,6})(?:\.\.([0-9A-Fa-f]{4,6}))?)\s*;\s*([A-Za-z]+)(?=\s|#|$)/;
+
+// UAX #44 permits multiple @missing lines for a property. Each successive
+// @missing line overrides the previous default for its range. Explicit data
+// entries then override all @missing defaults for code points they list.
+//
+// We keep the complete width state in a byte array while parsing. This makes
+// the precedence rules explicit and avoids trying to reconstruct arbitrary
+// overlapping interval assignments after the fact. The Unicode code point
+// space is only 1.1 MiB, and this is a development-time generator.
 export function parse(text) {
-  const ranges = [];
-  for (const line of text.split('\n')) {
-    // Comment lines are inert, except the ones documenting a default value.
-    if (!line.includes('@missing') && line.trimStart().startsWith('#')) continue;
-    const m = line.match(/^(?:#\s*@missing:\s*|@missing:\s*)?([0-9A-Fa-f]{4,6})(?:\.\.([0-9A-Fa-f]{4,6}))?\s*;\s*([WFAHNaN]+)(?=\s|#|$)/);
-    if (!m || (m[3] !== 'W' && m[3] !== 'F')) continue;
-    ranges.push([parseInt(m[1], 16), parseInt(m[2] ?? m[1], 16)]);
+  const wide = new Uint8Array(0x110000);
+  const missing = [];
+  const explicit = [];
+
+  for (const rawLine of text.split('\n')) {
+    const line = rawLine.trim();
+
+    if (line.startsWith('# @missing:')) {
+      const m = line.match(/^#\s*@missing:\s*(.*)$/);
+      const parsed = m?.[1].match(CODE_POINT_RANGE);
+      if (!parsed) continue;
+
+      const [_, lo, hi, value] = parsed;
+      if (!VALUE.has(value)) continue;
+      missing.push([
+        parseInt(lo, 16),
+        parseInt(hi ?? lo, 16),
+        VALUE.get(value),
+      ]);
+      continue;
+    }
+
+    if (!line || line.startsWith('#')) continue;
+
+    const m = line.match(CODE_POINT_RANGE);
+    if (!m) continue;
+
+    const [_, lo, hi, value] = m;
+    if (!VALUE.has(value)) continue;
+    explicit.push([
+      parseInt(lo, 16),
+      parseInt(hi ?? lo, 16),
+      VALUE.get(value),
+    ]);
   }
-  const merged = merge(ranges);
-  if (merged.length === 0) throw new Error('no W/F ranges parsed — is this EastAsianWidth.txt?');
-  return merged;
+
+  for (const [lo, hi, isWide] of missing) {
+    wide.fill(isWide ? 1 : 0, lo, hi + 1);
+  }
+
+  for (const [lo, hi, isWide] of explicit) {
+    wide.fill(isWide ? 1 : 0, lo, hi + 1);
+  }
+
+  const ranges = [];
+  let start = -1;
+
+  for (let code = 0; code <= 0x10ffff; code += 1) {
+    if (wide[code] && start < 0) {
+      start = code;
+    } else if (!wide[code] && start >= 0) {
+      ranges.push([start, code - 1]);
+      start = -1;
+    }
+  }
+
+  if (start >= 0) ranges.push([start, 0x10ffff]);
+
+  if (ranges.length === 0) throw new Error('no W/F ranges parsed — is this EastAsianWidth.txt?');
+  return ranges;
 }
 
 export function merge(ranges) {
@@ -76,8 +136,6 @@ export function render(ranges, version, date) {
   ].join('\n');
 }
 
-// Guarded so `import { parse } from '../tools/gen-wide.mjs'` in a test does
-// not fetch Unicode over the network and rewrite src/main.js.
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const args = process.argv.slice(2);
   const check = args.includes('--check');

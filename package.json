@@ -6,9 +6,9 @@
   "types": "dist/main.d.ts",
   "exports": {
     ".": {
-      "types": "./main.d.ts",
-      "require": "./main.js",
-      "default": "./main.js"
+      "types": "./dist/main.d.ts",
+      "require": "./dist/main.js",
+      "default": "./dist/main.js"
     }
   },
   "files": [

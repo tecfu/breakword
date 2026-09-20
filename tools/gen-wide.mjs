@@ -147,7 +147,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const ranges = parse(text);
   const block = render(ranges, version, date);
 
-  const file = path.join(import.meta.dirname, '..', 'src', 'main.js');
+  const file = path.join(import.meta.dirname, '..', 'src', 'main.ts');
   const src = fs.readFileSync(file, 'utf8');
   const marker = /\/\* <wide> \*\/[\s\S]*?\/\* <\/wide> \*\//;
   if (!marker.test(src)) throw new Error('markers not found in src/main.ts');

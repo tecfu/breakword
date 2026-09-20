@@ -47,9 +47,7 @@ test('explicit data entries override @missing defaults', () => {
 
   assert.deepEqual(parse(text), [
     [x('2000'), x('204F')],
-    [x('2060'), x('209F')],
-    [x('20A0'), x('20AF')],
-    [x('20B0'), x('20FF')],
+    [x('2060'), x('20FF')],
   ]);
 });
 

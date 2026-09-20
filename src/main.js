@@ -179,7 +179,10 @@ function width(char) {
     return 0;
   }
 
-  if ([...char].length !== 1) {
+  // A lone UTF-16 unit is already exactly one code point; only longer
+  // strings can hold more than one. Spreading unconditionally here costs
+  // ~24% on breakword()'s per-character loop, which always passes one.
+  if (char.length > 1 && [...char].length > 1) {
     throw new TypeError('width() expects exactly one Unicode code point');
   }
 

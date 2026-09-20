@@ -18,18 +18,42 @@ const x = (hex) => parseInt(hex, 16);
 
 test('parses a UCD-shaped file', () => {
   assert.deepEqual(parse(fixture), [
-    [x('1100'), x('1102')], // 1100 and 1101..1102 merge
-    [x('2000'), x('200F')], // from `# @missing:`
-    [x('2329'), x('2329')], // F counts
-    [x('2E80'), x('2E99')], // the 2E9A gap survives
+    [x('1100'), x('1102')],
+    [x('2000'), x('200F')],
+    [x('2329'), x('2329')],
+    [x('2E80'), x('2E99')],
     [x('2E9B'), x('3633')],
     [x('1F300'), x('1F320')],
   ]);
 });
 
+test('successive @missing lines override earlier defaults', () => {
+  const text = [
+    '# @missing: 0000..10FFFF; N',
+    '# @missing: 2000..20FF; W',
+    '# @missing: 2080..20FF; N',
+  ].join('\n');
+
+  assert.deepEqual(parse(text), [[x('2000'), x('207F')]]);
+});
+
+test('explicit data entries override @missing defaults', () => {
+  const text = [
+    '# @missing: 0000..10FFFF; N',
+    '# @missing: 2000..20FF; W',
+    '2050..205F ; N',
+    '20A0..20AF ; F',
+  ].join('\n');
+
+  assert.deepEqual(parse(text), [
+    [x('2000'), x('204F')],
+    [x('2060'), x('209F')],
+    [x('20A0'), x('20AF')],
+    [x('20B0'), x('20FF')],
+  ]);
+});
+
 test('a documented default value is not dropped', () => {
-  // The whole point of the `# @missing:` branch: a default of W would widen
-  // every code point in its range, so losing the line loses real width.
   const only = '# @missing: AC00..D7A3; W\n';
   assert.deepEqual(parse(only), [[x('AC00'), x('D7A3')]]);
 });
@@ -61,16 +85,13 @@ test('ranges are sorted, disjoint and in bounds', () => {
 test('every range is inclusive at both ends', () => {
   const at = (code) => WIDE.test(String.fromCodePoint(code));
   for (const [lo, hi] of WIDE_RANGES) {
-    assert.ok(at(lo) && at(hi), `0x${lo.toString(16)}..0x${hi.toString(16)} endpoints`);
+    assert.ok(at(lo) && at(hi), `0x${lo.toString(16)}..${hi.toString(16)} endpoints`);
     if (lo > 0) assert.ok(!at(lo - 1), `0x${(lo - 1).toString(16)} leaks in`);
     if (hi < 0x10ffff) assert.ok(!at(hi + 1), `0x${(hi + 1).toString(16)} leaks out`);
   }
 });
 
 test('the supplementary CJK blocks are wide, the gaps are not', () => {
-  // The whole of plane 2 and plane 3 is wide in the data, listed as explicit
-  // ranges (including the reserved ones), not as a default value. Pinning the
-  // block edges is what catches a parser that dropped a range.
   const at = (hex) => WIDE.test(String.fromCodePoint(x(hex)));
   for (const hex of ['20000', '2A6DF', '2F800', '2FFFD', '30000', '3134A', '3FFFD']) {
     assert.ok(at(hex), `${hex} should be wide`);
@@ -87,8 +108,6 @@ test('render records the Unicode provenance', () => {
   assert.match(block, /^  \[0x1100, 0x1102\],$/m);
 });
 
-// Off by default: it fetches 200 kB from unicode.org. CI runs it via
-// `npm run check:unicode`, which is what actually guards reproducibility.
 test('the table is reproducible from the pinned source', { skip: !process.env.CHECK_UNICODE }, () => {
   execFileSync(process.execPath, ['tools/gen-wide.mjs', UNICODE_VERSION, '--check'], {
     cwd: path.join(import.meta.dirname, '..'),

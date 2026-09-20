@@ -52,7 +52,7 @@ width('打破a\u200d'); // 5
 
 ## Development
 
-Tests use Node.js's built-in test runner, so no test framework or build step is required.
+Tests use Node.js's built-in test runner. The runtime is compiled from TypeScript before tests run.
 
 ```bash
 npm test
@@ -64,7 +64,7 @@ Supported Node.js versions are the current maintained LTS releases beginning wit
 
 ### The Unicode table
 
-`src/main.js` carries the `W`/`F` ranges from one pinned Unicode release, recorded in the generated block. The generator is pinned so a review can reproduce the table exactly:
+`src/main.ts` carries the `W`/`F` ranges from one pinned Unicode release, recorded in the generated block. The generator is pinned so a review can reproduce the table exactly:
 
 ```bash
 npm run regen:unicode              # tools/gen-wide.mjs, pinned release

@@ -171,6 +171,21 @@ const ZERO = /[\u200B\p{Mn}\p{Me}\p{Cf}\u1160-\u11FF]/u;
 const EMOJI = /\p{Emoji_Presentation}/u;
 
 function width(char) {
+  if (typeof char !== 'string') {
+    throw new TypeError('width() expects a string');
+  }
+
+  if (char.length === 0) {
+    return 0;
+  }
+
+  // A lone UTF-16 unit is already exactly one code point; only longer
+  // strings can hold more than one. Spreading unconditionally here costs
+  // ~24% on breakword()'s per-character loop, which always passes one.
+  if (char.length > 1 && [...char].length > 1) {
+    throw new TypeError('width() expects exactly one Unicode code point');
+  }
+
   const cp = char.codePointAt(0);
   if (cp < 32 || (cp >= 0x7f && cp < 0xa0)) return 0; // C0/C1 controls
   if (cp === 0xad) return 1; // SOFT HYPHEN, width 1 by the wcwidth() convention
@@ -210,6 +225,13 @@ module.exports = function breakword(input, breakAtLength) {
 
   return indexOfLastFitChar;
 };
+
+/**
+ * Number of terminal cells (0, 1 or 2) a single Unicode code point occupies,
+ * under the width policy documented at the top of this file. Takes one code
+ * point, not a string — sum it over `[...str]` for a string width.
+ */
+module.exports.width = width;
 
 // Used by test/unicode.test.js and test/gen-wide.test.js to check the table
 // and its rules against Unicode properties. Not part of the public API and

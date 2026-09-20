@@ -4,6 +4,28 @@ const test = require('node:test');
 const assert = require('node:assert/strict');
 const breakword = require('..');
 
+test('width() returns the width of a single Unicode code point', () => {
+  assert.equal(breakword.width('a'), 1);
+  assert.equal(breakword.width('打'), 2);
+  assert.equal(breakword.width('😀'), 2);
+  assert.equal(breakword.width('\u0301'), 0);
+  assert.equal(breakword.width('\u200D'), 0);
+  assert.equal(breakword.width('\u0000'), 0);
+  assert.equal(breakword.width('\u{1F1EB}'), 1);
+});
+
+test('width() returns zero for an empty string and rejects invalid input', () => {
+  assert.equal(breakword.width(''), 0);
+  assert.throws(() => breakword.width('ab'), {
+    name: 'TypeError',
+    message: 'width() expects exactly one Unicode code point',
+  });
+  assert.throws(() => breakword.width(1), {
+    name: 'TypeError',
+    message: 'width() expects a string',
+  });
+});
+
 const cases = [
   ['2.0', 1, 0],
   [2.1, 1, 0],

@@ -21,6 +21,7 @@
     "test": "npm run build && node --test",
     "regen:unicode": "node tools/gen-wide.mjs",
     "check:unicode": "node tools/gen-wide.mjs --check",
+    "typecheck": "tsc --project tsconfig.typecheck.json --noEmit",
     "prepublishOnly": "npm test"
   },
   "devDependencies": {

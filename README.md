@@ -77,4 +77,4 @@ Regenerating is a deliberate act: it can move break indices, so the table, the p
 
 ## Release
 
-The package ships the source module directly. `npm publish` runs the test suite before publishing.
+The package ships the compiled CommonJS runtime and TypeScript declarations from `dist/`. `npm publish` runs the build and test suite before publishing.

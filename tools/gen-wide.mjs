@@ -1,16 +1,16 @@
 #!/usr/bin/env node
-// Regenerates the East Asian Wide/Fullwidth table in src/main.js from a pinned
+// Regenerates the East Asian Wide/Fullwidth table in src/main.ts from a pinned
 // Unicode release. Development-only: not published (see "files" in
 // package.json) and not loaded at runtime.
 //
 //   node tools/gen-wide.mjs                 # pin to UNICODE_VERSION
 //   node tools/gen-wide.mjs 17.0.0          # a specific Unicode release
 //   node tools/gen-wide.mjs path/to/EastAsianWidth.txt
-//   node tools/gen-wide.mjs --check         # verify src/main.js is reproducible
+//   node tools/gen-wide.mjs --check         # verify src/main.ts is reproducible
 //
 // Rewrites the block between /* <wide> */ and /* </wide> */. Only W (wide) and
 // F (fullwidth) are needed: everything the file classifies as N, Na, A or H is
-// width 1, and the zero-width rules live in src/main.js as property escapes.
+// width 1, and the zero-width rules live in src/main.ts as property escapes.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -129,7 +129,7 @@ export function render(ranges, version, date) {
     `// East Asian Width W + F — EastAsianWidth-${version}.txt (${date})`,
     `// Regenerate: node tools/gen-wide.mjs ${version}`,
     `const UNICODE_VERSION = '${version}';`,
-    'const WIDE_RANGES = [',
+    'const WIDE_RANGES: Array<[number, number]> = [',
     ...entries,
     '];',
     '/* </wide> */',
@@ -147,20 +147,20 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const ranges = parse(text);
   const block = render(ranges, version, date);
 
-  const file = path.join(import.meta.dirname, '..', 'src', 'main.js');
+  const file = path.join(import.meta.dirname, '..', 'src', 'main.ts');
   const src = fs.readFileSync(file, 'utf8');
   const marker = /\/\* <wide> \*\/[\s\S]*?\/\* <\/wide> \*\//;
-  if (!marker.test(src)) throw new Error('markers not found in src/main.js');
+  if (!marker.test(src)) throw new Error('markers not found in src/main.ts');
 
   if (check) {
     if (src.match(marker)[0] === block) {
       console.log(`reproducible: ${ranges.length} ranges from EastAsianWidth-${version}.txt`);
     } else {
-      console.error(`STALE: src/main.js is not what EastAsianWidth-${version}.txt produces`);
+      console.error(`STALE: src/main.ts is not what EastAsianWidth-${version}.txt produces`);
       process.exitCode = 1;
     }
   } else {
     fs.writeFileSync(file, src.replace(marker, () => block));
-    console.log(`src/main.js: Unicode ${version}, ${ranges.length} wide/fullwidth ranges`);
+    console.log(`src/main.ts: Unicode ${version}, ${ranges.length} wide/fullwidth ranges`);
   }
 }

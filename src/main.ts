@@ -18,7 +18,7 @@
 // East Asian Width W + F — EastAsianWidth-18.0.0.txt (2026-06-29, 15:25:05 GMT)
 // Regenerate: node tools/gen-wide.mjs 18.0.0
 const UNICODE_VERSION = '18.0.0';
-const WIDE_RANGES = [
+const WIDE_RANGES: Array<[number, number]> = [
   [0x1100, 0x115F],
   [0x231A, 0x231B],
   [0x2329, 0x232A],
@@ -148,29 +148,19 @@ const WIDE_RANGES = [
 ];
 /* </wide> */
 
-const cell = (cp) => (cp <= 0xffff
+const cell = (cp: number) => (cp <= 0xffff
   ? `\\u${cp.toString(16).toUpperCase().padStart(4, '0')}`
   : `\\u{${cp.toString(16).toUpperCase()}}`);
 
-// One character class is what V8 wants for a range lookup this large; it
-// compiles the ranges into an interval set rather than scanning them.
 const WIDE = new RegExp(
   '[' + WIDE_RANGES.map(([lo, hi]) => cell(lo) + (hi > lo ? `-${cell(hi)}` : '')).join('') + ']',
   'u',
 );
 
-// Marks and format characters, plus the two cases Unicode files elsewhere:
-// ZERO WIDTH SPACE (Zs) and the Hangul Jamo medial vowels and final
-// consonants, which terminals paint on top of the preceding cell.
-const ZERO = /[\u200B\p{Mn}\p{Me}\p{Cf}\u1160-\u11FF]/u;
+const ZERO = /[\\u200B\\p{Mn}\\p{Me}\\p{Cf}\\u1160-\\u11FF]/u;
+const EMOJI = /\\p{Emoji_Presentation}/u;
 
-// Emoji that render two cells without being asked to (UAX #51
-// Emoji_Presentation). Regional indicators are excluded: one is a letter-ish
-// glyph of 1 cell, and a pair is what makes a single 2-cell flag, so scoring
-// each as 1 is what gets flags right.
-const EMOJI = /\p{Emoji_Presentation}/u;
-
-function width(char) {
+const width = (char: string): 0 | 1 | 2 => {
   if (typeof char !== 'string') {
     throw new TypeError('width() expects a string');
   }
@@ -179,61 +169,55 @@ function width(char) {
     return 0;
   }
 
-  // A lone UTF-16 unit is already exactly one code point; only longer
-  // strings can hold more than one. Spreading unconditionally here costs
-  // ~24% on breakword()'s per-character loop, which always passes one.
   if (char.length > 1 && [...char].length > 1) {
     throw new TypeError('width() expects exactly one Unicode code point');
   }
 
-  const cp = char.codePointAt(0);
-  if (cp < 32 || (cp >= 0x7f && cp < 0xa0)) return 0; // C0/C1 controls
-  if (cp === 0xad) return 1; // SOFT HYPHEN, width 1 by the wcwidth() convention
+  const cp = char.codePointAt(0)!;
+  if (cp < 32 || (cp >= 0x7f && cp < 0xa0)) return 0;
+  if (cp === 0xad) return 1;
   if (ZERO.test(char)) return 0;
   if (EMOJI.test(char) && !(cp >= 0x1f1e6 && cp <= 0x1f1ff)) return 2;
   return WIDE.test(char) ? 2 : 1;
-}
+};
+
 // ponytail: widths are per code point, so a ZWJ family (👨‍👩‍👧) counts as its
 // members and a text-presentation emoji followed by U+FE0F (❤️) stays narrow.
 // Needs grapheme clustering (Intl.Segmenter) plus Emoji_Presentation/VS16 per
 // cluster to fix; costs a segmenter per call, so opt-in only if it bites.
 // Pinned by the sequence regressions in test/test.js. See #21.
 
-/**
- * Return the zero-based character index after which `input` should be broken
- * so that its display width does not exceed `breakAtLength`.
- *
- * Indices are based on Unicode code points rather than UTF-16 code units.
- */
-module.exports = function breakword(input, breakAtLength) {
-  const str = String(input);
-  let indexOfLastFitChar = 0;
-  let fittableLength = 0;
-  let index = 0;
+const internals = { UNICODE_VERSION, WIDE_RANGES, WIDE, ZERO, EMOJI, width };
 
-  for (const char of str) {
-    const currentLength = fittableLength + width(char);
-
-    if (currentLength > breakAtLength) {
-      break;
-    }
-
-    indexOfLastFitChar = index;
-    fittableLength = currentLength;
-    index += 1;
-  }
-
-  return indexOfLastFitChar;
+type Breakword = {
+  (input: unknown, breakAtLength: number): number;
+  width: typeof width;
+  /** @internal */
+  internals: typeof internals;
 };
 
-/**
- * Number of terminal cells (0, 1 or 2) a single Unicode code point occupies,
- * under the width policy documented at the top of this file. Takes one code
- * point, not a string — sum it over `[...str]` for a string width.
- */
-module.exports.width = width;
+const breakword: Breakword = Object.assign(
+  (input: unknown, breakAtLength: number) => {
+    const str = String(input);
+    let indexOfLastFitChar = 0;
+    let fittableLength = 0;
+    let index = 0;
 
-// Used by test/unicode.test.js and test/gen-wide.test.js to check the table
-// and its rules against Unicode properties. Not part of the public API and
-// not covered by semver.
-module.exports.internals = { UNICODE_VERSION, WIDE_RANGES, WIDE, ZERO, EMOJI, width };
+    for (const char of str) {
+      const currentLength = fittableLength + width(char);
+
+      if (currentLength > breakAtLength) {
+        break;
+      }
+
+      indexOfLastFitChar = index;
+      fittableLength = currentLength;
+      index += 1;
+    }
+
+    return indexOfLastFitChar;
+  },
+  { width, internals },
+);
+
+export = breakword;

@@ -25,3 +25,5 @@ jobs:
         run: npm ci
       - name: Test
         run: npm test
+      - name: Verify the generated Unicode table
+        run: npm run check:unicode

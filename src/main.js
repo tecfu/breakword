@@ -1,169 +1,188 @@
 'use strict';
 
-/**
- * East Asian Wide (W) and Fullwidth (F) code-point ranges, from the Unicode
- * Character Database EastAsianWidth.txt (including the @missing defaults for
- * unassigned planes). Regenerate with `node tools/gen-wide.mjs`.
- */
+// Which code points occupy two terminal cells. A policy decision, not a
+// Unicode fact: UAX #11 defines East Asian Width as a *hint* that is expected
+// to be tailored per environment, so this module states its own rules —
+//
+//   2  East Asian Width W or F (generated table below), plus emoji that
+//      Unicode Standard Annex #51 gives the emoji presentation by default
+//   0  non-spacing and enclosing marks, format characters, C0/C1 controls
+//   1  everything else, including A (ambiguous) and the astral plane's
+//      non-CJK blocks, which are East Asian Width Na
+//
+// A consumer that pads a fixed-width column against a specific terminal may
+// want A rendered as 2 (CJK locale) or emoji as 1 (a narrow font). That is a
+// different policy, not a bug in this one.
+
 /* <wide> */
-// East Asian Width W+F ranges — 2026-06-29, 15:25:05 GMT
-const WIDE = new RegExp(
-  '[' + [
-  '\\u1100-\\u115F',
-  '\\u231A-\\u231B',
-  '\\u2329-\\u232A',
-  '\\u23E9-\\u23EC',
-  '\\u23F0',
-  '\\u23F3',
-  '\\u25FD-\\u25FE',
-  '\\u2614-\\u2615',
-  '\\u2630-\\u2637',
-  '\\u2648-\\u2653',
-  '\\u267F',
-  '\\u268A-\\u268F',
-  '\\u2693',
-  '\\u26A1',
-  '\\u26AA-\\u26AB',
-  '\\u26BD-\\u26BE',
-  '\\u26C4-\\u26C5',
-  '\\u26CE',
-  '\\u26D4',
-  '\\u26EA',
-  '\\u26F2-\\u26F3',
-  '\\u26F5',
-  '\\u26FA',
-  '\\u26FD',
-  '\\u2705',
-  '\\u270A-\\u270B',
-  '\\u2728',
-  '\\u274C',
-  '\\u274E',
-  '\\u2753-\\u2755',
-  '\\u2757',
-  '\\u2795-\\u2797',
-  '\\u27B0',
-  '\\u27BF',
-  '\\u2B1B-\\u2B1C',
-  '\\u2B50',
-  '\\u2B55',
-  '\\u2E80-\\u2E99',
-  '\\u2E9B-\\u2EF3',
-  '\\u2F00-\\u2FD5',
-  '\\u2FF0-\\u303E',
-  '\\u3041-\\u3096',
-  '\\u3099-\\u30FF',
-  '\\u3105-\\u312F',
-  '\\u3131-\\u318E',
-  '\\u3190-\\u31E5',
-  '\\u31EF-\\u321E',
-  '\\u3220-\\u3247',
-  '\\u3250-\\uA48C',
-  '\\uA490-\\uA4C6',
-  '\\uA960-\\uA97C',
-  '\\uAC00-\\uD7A3',
-  '\\uF900-\\uFAFF',
-  '\\uFE10-\\uFE19',
-  '\\uFE30-\\uFE52',
-  '\\uFE54-\\uFE66',
-  '\\uFE68-\\uFE6B',
-  '\\uFF01-\\uFF60',
-  '\\uFFE0-\\uFFE6',
-  '\\u{16FE0}-\\u{16FE4}',
-  '\\u{16FF0}-\\u{16FF6}',
-  '\\u{17000}-\\u{18CDA}',
-  '\\u{18CFF}-\\u{18D20}',
-  '\\u{18D80}-\\u{18DF2}',
-  '\\u{18E00}-\\u{19191}',
-  '\\u{191A0}-\\u{191D2}',
-  '\\u{1AFF0}-\\u{1AFF3}',
-  '\\u{1AFF5}-\\u{1AFFB}',
-  '\\u{1AFFD}-\\u{1AFFE}',
-  '\\u{1B000}-\\u{1B128}',
-  '\\u{1B132}',
-  '\\u{1B150}-\\u{1B152}',
-  '\\u{1B155}',
-  '\\u{1B164}-\\u{1B168}',
-  '\\u{1B170}-\\u{1B2FB}',
-  '\\u{1D300}-\\u{1D356}',
-  '\\u{1D360}-\\u{1D376}',
-  '\\u{1F004}',
-  '\\u{1F0CF}',
-  '\\u{1F18E}',
-  '\\u{1F191}-\\u{1F19A}',
-  '\\u{1F1AE}',
-  '\\u{1F200}-\\u{1F202}',
-  '\\u{1F210}-\\u{1F23B}',
-  '\\u{1F240}-\\u{1F248}',
-  '\\u{1F250}-\\u{1F251}',
-  '\\u{1F260}-\\u{1F265}',
-  '\\u{1F300}-\\u{1F320}',
-  '\\u{1F32D}-\\u{1F335}',
-  '\\u{1F337}-\\u{1F37C}',
-  '\\u{1F37E}-\\u{1F393}',
-  '\\u{1F3A0}-\\u{1F3CA}',
-  '\\u{1F3CF}-\\u{1F3D3}',
-  '\\u{1F3E0}-\\u{1F3F0}',
-  '\\u{1F3F4}',
-  '\\u{1F3F8}-\\u{1F43E}',
-  '\\u{1F440}',
-  '\\u{1F442}-\\u{1F4FC}',
-  '\\u{1F4FF}-\\u{1F53D}',
-  '\\u{1F54B}-\\u{1F54E}',
-  '\\u{1F550}-\\u{1F567}',
-  '\\u{1F57A}',
-  '\\u{1F595}-\\u{1F596}',
-  '\\u{1F5A4}',
-  '\\u{1F5FB}-\\u{1F64F}',
-  '\\u{1F680}-\\u{1F6C5}',
-  '\\u{1F6CC}',
-  '\\u{1F6D0}-\\u{1F6D2}',
-  '\\u{1F6D5}-\\u{1F6D9}',
-  '\\u{1F6DC}-\\u{1F6DF}',
-  '\\u{1F6EB}-\\u{1F6EC}',
-  '\\u{1F6F4}-\\u{1F6FC}',
-  '\\u{1F7DA}',
-  '\\u{1F7E0}-\\u{1F7EB}',
-  '\\u{1F7F0}',
-  '\\u{1F90C}-\\u{1F93A}',
-  '\\u{1F93C}-\\u{1F945}',
-  '\\u{1F947}-\\u{1F9FF}',
-  '\\u{1FA70}-\\u{1FA7C}',
-  '\\u{1FA80}-\\u{1FAC6}',
-  '\\u{1FAC8}',
-  '\\u{1FACC}-\\u{1FADD}',
-  '\\u{1FADF}-\\u{1FAEB}',
-  '\\u{1FAEF}-\\u{1FAFA}',
-  '\\u{20000}-\\u{2FFFD}',
-  '\\u{30000}-\\u{3FFFD}',
-  ].join('') + ']',
-  'u',
-);
+// East Asian Width W + F — EastAsianWidth-18.0.0.txt (2026-06-29, 15:25:05 GMT)
+// Regenerate: node tools/gen-wide.mjs 18.0.0
+const UNICODE_VERSION = '18.0.0';
+const WIDE_RANGES = [
+  [0x1100, 0x115F],
+  [0x231A, 0x231B],
+  [0x2329, 0x232A],
+  [0x23E9, 0x23EC],
+  [0x23F0, 0x23F0],
+  [0x23F3, 0x23F3],
+  [0x25FD, 0x25FE],
+  [0x2614, 0x2615],
+  [0x2630, 0x2637],
+  [0x2648, 0x2653],
+  [0x267F, 0x267F],
+  [0x268A, 0x268F],
+  [0x2693, 0x2693],
+  [0x26A1, 0x26A1],
+  [0x26AA, 0x26AB],
+  [0x26BD, 0x26BE],
+  [0x26C4, 0x26C5],
+  [0x26CE, 0x26CE],
+  [0x26D4, 0x26D4],
+  [0x26EA, 0x26EA],
+  [0x26F2, 0x26F3],
+  [0x26F5, 0x26F5],
+  [0x26FA, 0x26FA],
+  [0x26FD, 0x26FD],
+  [0x2705, 0x2705],
+  [0x270A, 0x270B],
+  [0x2728, 0x2728],
+  [0x274C, 0x274C],
+  [0x274E, 0x274E],
+  [0x2753, 0x2755],
+  [0x2757, 0x2757],
+  [0x2795, 0x2797],
+  [0x27B0, 0x27B0],
+  [0x27BF, 0x27BF],
+  [0x2B1B, 0x2B1C],
+  [0x2B50, 0x2B50],
+  [0x2B55, 0x2B55],
+  [0x2E80, 0x2E99],
+  [0x2E9B, 0x2EF3],
+  [0x2F00, 0x2FD5],
+  [0x2FF0, 0x303E],
+  [0x3041, 0x3096],
+  [0x3099, 0x30FF],
+  [0x3105, 0x312F],
+  [0x3131, 0x318E],
+  [0x3190, 0x31E5],
+  [0x31EF, 0x321E],
+  [0x3220, 0x3247],
+  [0x3250, 0xA48C],
+  [0xA490, 0xA4C6],
+  [0xA960, 0xA97C],
+  [0xAC00, 0xD7A3],
+  [0xF900, 0xFAFF],
+  [0xFE10, 0xFE19],
+  [0xFE30, 0xFE52],
+  [0xFE54, 0xFE66],
+  [0xFE68, 0xFE6B],
+  [0xFF01, 0xFF60],
+  [0xFFE0, 0xFFE6],
+  [0x16FE0, 0x16FE4],
+  [0x16FF0, 0x16FF6],
+  [0x17000, 0x18CDA],
+  [0x18CFF, 0x18D20],
+  [0x18D80, 0x18DF2],
+  [0x18E00, 0x19191],
+  [0x191A0, 0x191D2],
+  [0x1AFF0, 0x1AFF3],
+  [0x1AFF5, 0x1AFFB],
+  [0x1AFFD, 0x1AFFE],
+  [0x1B000, 0x1B128],
+  [0x1B132, 0x1B132],
+  [0x1B150, 0x1B152],
+  [0x1B155, 0x1B155],
+  [0x1B164, 0x1B168],
+  [0x1B170, 0x1B2FB],
+  [0x1D300, 0x1D356],
+  [0x1D360, 0x1D376],
+  [0x1F004, 0x1F004],
+  [0x1F0CF, 0x1F0CF],
+  [0x1F18E, 0x1F18E],
+  [0x1F191, 0x1F19A],
+  [0x1F1AE, 0x1F1AE],
+  [0x1F200, 0x1F202],
+  [0x1F210, 0x1F23B],
+  [0x1F240, 0x1F248],
+  [0x1F250, 0x1F251],
+  [0x1F260, 0x1F265],
+  [0x1F300, 0x1F320],
+  [0x1F32D, 0x1F335],
+  [0x1F337, 0x1F37C],
+  [0x1F37E, 0x1F393],
+  [0x1F3A0, 0x1F3CA],
+  [0x1F3CF, 0x1F3D3],
+  [0x1F3E0, 0x1F3F0],
+  [0x1F3F4, 0x1F3F4],
+  [0x1F3F8, 0x1F43E],
+  [0x1F440, 0x1F440],
+  [0x1F442, 0x1F4FC],
+  [0x1F4FF, 0x1F53D],
+  [0x1F54B, 0x1F54E],
+  [0x1F550, 0x1F567],
+  [0x1F57A, 0x1F57A],
+  [0x1F595, 0x1F596],
+  [0x1F5A4, 0x1F5A4],
+  [0x1F5FB, 0x1F64F],
+  [0x1F680, 0x1F6C5],
+  [0x1F6CC, 0x1F6CC],
+  [0x1F6D0, 0x1F6D2],
+  [0x1F6D5, 0x1F6D9],
+  [0x1F6DC, 0x1F6DF],
+  [0x1F6EB, 0x1F6EC],
+  [0x1F6F4, 0x1F6FC],
+  [0x1F7DA, 0x1F7DA],
+  [0x1F7E0, 0x1F7EB],
+  [0x1F7F0, 0x1F7F0],
+  [0x1F90C, 0x1F93A],
+  [0x1F93C, 0x1F945],
+  [0x1F947, 0x1F9FF],
+  [0x1FA70, 0x1FA7C],
+  [0x1FA80, 0x1FAC6],
+  [0x1FAC8, 0x1FAC8],
+  [0x1FACC, 0x1FADD],
+  [0x1FADF, 0x1FAEB],
+  [0x1FAEF, 0x1FAFA],
+  [0x20000, 0x2FFFD],
+  [0x30000, 0x3FFFD],
+];
 /* </wide> */
 
-/**
- * Zero-width: non-spacing/enclosing marks and format characters, plus the two
- * cases Unicode classifies elsewhere — ZERO WIDTH SPACE (Zs) and the Hangul Jamo
- * medial vowels and final consonants.
- */
+const cell = (cp) => (cp <= 0xffff
+  ? `\\u${cp.toString(16).toUpperCase().padStart(4, '0')}`
+  : `\\u{${cp.toString(16).toUpperCase()}}`);
+
+// One character class is what V8 wants for a range lookup this large; it
+// compiles the ranges into an interval set rather than scanning them.
+const WIDE = new RegExp(
+  '[' + WIDE_RANGES.map(([lo, hi]) => cell(lo) + (hi > lo ? `-${cell(hi)}` : '')).join('') + ']',
+  'u',
+);
+
+// Marks and format characters, plus the two cases Unicode files elsewhere:
+// ZERO WIDTH SPACE (Zs) and the Hangul Jamo medial vowels and final
+// consonants, which terminals paint on top of the preceding cell.
 const ZERO = /[\u200B\p{Mn}\p{Me}\p{Cf}\u1160-\u11FF]/u;
 
-// Emoji that occupy two cells by default (Unicode Standard Annex #51).
+// Emoji that render two cells without being asked to (UAX #51
+// Emoji_Presentation). Regional indicators are excluded: one is a letter-ish
+// glyph of 1 cell, and a pair is what makes a single 2-cell flag, so scoring
+// each as 1 is what gets flags right.
 const EMOJI = /\p{Emoji_Presentation}/u;
 
-const width = (char) => {
+function width(char) {
   const cp = char.codePointAt(0);
   if (cp < 32 || (cp >= 0x7f && cp < 0xa0)) return 0; // C0/C1 controls
   if (cp === 0xad) return 1; // SOFT HYPHEN, width 1 by the wcwidth() convention
   if (ZERO.test(char)) return 0;
-  // Regional indicators are only wide in pairs, which sum to the two cells of
-  // one flag glyph.
   if (EMOJI.test(char) && !(cp >= 0x1f1e6 && cp <= 0x1f1ff)) return 2;
   return WIDE.test(char) ? 2 : 1;
-};
+}
 // ponytail: widths are per code point, so a ZWJ family (👨‍👩‍👧) counts as its
 // members and a text-presentation emoji followed by U+FE0F (❤️) stays narrow.
 // Needs grapheme clustering (Intl.Segmenter) plus Emoji_Presentation/VS16 per
 // cluster to fix; costs a segmenter per call, so opt-in only if it bites.
+// Pinned by the sequence regressions in test/test.js. See #21.
 
 /**
  * Return the zero-based character index after which `input` should be broken
@@ -191,3 +210,8 @@ module.exports = function breakword(input, breakAtLength) {
 
   return indexOfLastFitChar;
 };
+
+// Used by test/unicode.test.js and test/gen-wide.test.js to check the table
+// and its rules against Unicode properties. Not part of the public API and
+// not covered by semver.
+module.exports.internals = { UNICODE_VERSION, WIDE_RANGES, WIDE, ZERO, EMOJI, width };

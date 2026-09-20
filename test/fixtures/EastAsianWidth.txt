@@ -1,0 +1,22 @@
+# EastAsianWidth-0.0.0.txt
+# Date: 2026-01-01, 00:00:00 GMT
+#
+# Synthetic fixture for tools/gen-wide.mjs. Values are UCD-shaped but the
+# code points are arbitrary; it exists to pin parser semantics offline, so
+# regeneration stays testable without the network.
+#
+# @missing: 0000..10FFFF; N
+# @missing: 2000..200F; W
+
+0041..0043   ; N  # Latin capital A..C — not wide
+0100         ; Na # narrow
+0250..0290   ; A  # ambiguous, width 1 under this policy
+0300..033F   ; N  # combining marks are handled by \p{Mn}, not by this table
+# 0400..0410 ; W  # commented out, must not reach the table
+1100         ; W  # singletons that touch merge into one range
+1101..1102   ; W
+2329         ; F  # fullwidth counts as wide
+2E80..2E99   ; W  # a gap at 2E9A must survive the merge
+2E9B..3633   ; W
+E000..F8FF   ; A  # private use
+1F300..1F320 ; W  # astral

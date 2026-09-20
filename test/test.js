@@ -30,3 +30,20 @@ for (const [input, width, expected] of cases) {
     assert.equal(breakword(input, width), expected);
   });
 }
+
+// Width is scored per code point, so a cluster is charged for its members
+// rather than for the one glyph a terminal draws. These are wrong on purpose:
+// pinned so that any change to the sequence policy is a decision, not drift.
+// See #21 for the grapheme-clustering fix and src/main.js for the trade-off.
+const sequences = [
+  ['\u2764\uFE0Fab', 2, 2, 'VS16 promotion (❤️) costs nothing, so the row overflows by a cell'],
+  ['\u{1F468}\u200D\u{1F469}\u200D\u{1F467}ab', 4, 3, 'ZWJ family (👨‍👩‍👧) charges 6 cells for one glyph'],
+  ['1\uFE0F\u20E3ab', 2, 3, 'keycap (1️⃣) charges 1 cell and breaks after the a'],
+  ['\u{1F44D}\u{1F3FD}x', 2, 0, 'skin tone modifier (👍🏽) charges a second glyph'],
+];
+
+for (const [input, at, expected, why] of sequences) {
+  test(`known sequence limitation ${why}`, () => {
+    assert.equal(breakword(input, at), expected);
+  });
+}

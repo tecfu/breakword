@@ -129,7 +129,7 @@ export function render(ranges, version, date) {
     `// East Asian Width W + F — EastAsianWidth-${version}.txt (${date})`,
     `// Regenerate: node tools/gen-wide.mjs ${version}`,
     `const UNICODE_VERSION = '${version}';`,
-    'const WIDE_RANGES = [',
+    'const WIDE_RANGES: Array<[number, number]> = [',
     ...entries,
     '];',
     '/* </wide> */',

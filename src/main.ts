@@ -192,6 +192,7 @@ const internals = { UNICODE_VERSION, WIDE_RANGES, WIDE, ZERO, EMOJI, width };
 type Breakword = {
   (input: unknown, breakAtLength: number): number;
   width: typeof width;
+  /** @internal */
   internals: typeof internals;
 };
 
